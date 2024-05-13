@@ -5,6 +5,7 @@ With Otel impl, it seems to have problem when we add Baggages. It has trouble in
 Steps for otel
 - Uncomment `micrometer-tracing-bridge-otel` dependnecy in pom.xml
 - Comment out `micrometer-tracing-bridge-brave` dependency in pom.xml
+- Run app `mvn clean install spring-boot:run `
 - Hit below requests one by one and observe logs : -
 <br> `curl -v http://localhost:8080/api/v1/todos`
 <br> `curl -v http://localhost:8080/api/v1/todos/1`
@@ -15,6 +16,7 @@ Steps for otel
 Steps for Brave
 - Comment out `micrometer-tracing-bridge-otel` dependnecy in pom.xml
 - Uncomment `micrometer-tracing-bridge-brave` dependency in pom.xml
+- Run app `mvn clean install spring-boot:run `
 - Hit below requests one by one and observe logs : -
 <br> `curl -v http://localhost:8080/api/v1/todos`
 <br> `curl -v http://localhost:8080/api/v1/todos/1`
