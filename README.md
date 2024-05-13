@@ -9,7 +9,7 @@ Steps for otel
 - Hit below requests one by one and observe logs : -
 <br> `curl -v http://localhost:8080/api/v1/todos`
 <br> `curl -v http://localhost:8080/api/v1/todos/1`
-- TraceId for both the requests would be same (it should be different for each req)
+- Observe TraceIds of both the requests, they would be same (ideally they should be different for each req)
 - Also for the log event `LogBeforeAddingBaggage`, first request wont print any baggage (which is expected), but for second request it will print baggages of previous req (look for uri baggage)
 
 
