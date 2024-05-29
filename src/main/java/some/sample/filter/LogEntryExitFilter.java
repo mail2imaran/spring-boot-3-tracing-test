@@ -85,10 +85,17 @@ public class LogEntryExitFilter implements WebFilter {
         final WebFilterChain chain) {
         long startTime = System.currentTimeMillis();
         log.info("event=LogBeforeAddingBaggage");
+        List<BaggageInScope> baggages = new ArrayList<>();
         return getCommonLogMap(exchange).flatMap(commonLogs -> {
             exchange.getAttributes()
                 .put(COMMON_LOGS_KEY, commonLogs);
-            commonLogs.forEach(tracer::createBaggageInScope);
+            commonLogs.entrySet()
+                .stream()
+                .forEach(entry -> {
+                    BaggageInScope baggage = tracer
+                        .createBaggageInScope(entry.getKey(), entry.getValue());
+                    baggages.add(baggage);
+                });
 
             log.info("{}", composeEntryLogMap(exchange, EMPTY_MAP));
             return chain.filter(exchange);
@@ -98,7 +105,8 @@ public class LogEntryExitFilter implements WebFilter {
                 .put(EXCEPTION_KEY, throwable))
 
             .doFinally(
-                signal -> logRequestExitEvent(exchange, signal, startTime));
+                signal -> logRequestExitEvent(exchange, signal, startTime,
+                    baggages));
 
     }
 
@@ -163,7 +171,8 @@ public class LogEntryExitFilter implements WebFilter {
 
 
     private void logRequestExitEvent(final ServerWebExchange webExchange,
-        final SignalType signal, final long startTime) {
+        final SignalType signal, final long startTime,
+        final List<BaggageInScope> baggages) {
         try {
             // Map<String, String> commonLogs = webExchange
             // .getAttributeOrDefault(COMMON_LOGS_KEY, Collections.emptyMap());
@@ -207,6 +216,8 @@ public class LogEntryExitFilter implements WebFilter {
                     Map.of("event", "RequestExitEventStackTrace", "signal", signal);
                 log.error("{}", errorLoggerInfo, th);
             });
+            
+            baggages.forEach(BaggageInScope::close);
         }
         catch (Throwable th) {
             logError(webExchange, th);
